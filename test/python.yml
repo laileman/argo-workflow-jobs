@@ -1,0 +1,59 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: python-test
+  generateName: python-test-
+spec:
+  entrypoint: main
+  templates:
+  - name: main
+    steps:
+    - - name: git-clone
+        templateRef: 
+          name: git-artifact
+          template: clone
+        arguments:
+          parameters:
+          - name: workingdir
+            value: "{{workflow.name}}-workingdir-data"
+          - name: git-url
+            value: "https://github.com/laileman/ec2-cli-demo.git"
+          - name: git-revision
+            value: main
+
+    - - name: python-test
+        templateRef:
+          name: terminal
+          template: run
+        arguments:
+          parameters:
+          - name: workingdir
+            value: "{{workflow.name}}-workingdir-data"
+          - name: commands
+            value: |
+              pwd
+              go version
+              cd /workingDir/git/ec2-cli-demo
+              go mod tidy
+              go run main.go --help
+
+              
+              
+        
+          - name: image
+            value: golang:1.24.4-alpine
+  # - name: run
+  #   container:
+  #     image: "{{inputs.parameters.image}}"
+  #     command: [sh, -c]
+  #     args: ["{{inputs.parameters.commands}}"]
+  volumeClaimTemplates:                 # define volume, same syntax as k8s Pod spec
+  - metadata:
+      name: workingdir-data                    # name of volume claim
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Mi
+
+ 

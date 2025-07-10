@@ -1,0 +1,6 @@
+resources:
+- terminal.yml
+- git-artifact.yml
+
+
+namespace: argo

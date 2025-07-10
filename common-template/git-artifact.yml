@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: git-artifact
+spec:
+  templates:
+  - name: clone
+    inputs:
+      parameters:
+        - name: workingdir
+        - name: git-url
+          description: "Git repository URL"
+        - name: git-revision
+          description: "Git revision (branch, tag, or commit SHA)"
+        # - name: token
+        #   description: "Git personal access token"
+        # - name: 
+    volumes:
+      - name: workingdir-data
+        persistentVolumeClaim:
+          claimName: "{{inputs.parameters.workingdir}}"
+
+    script:
+      image: alpine/git:latest
+      command: [sh,-c]
+      volumeMounts:
+      - name: workingdir-data
+        mountPath: /workingDir
+      source: |
+        mkdir -p /workingDir/git
+        cd /workingDir/git
+        git clone  --branch {{inputs.parameters.git-revision}} {{inputs.parameters.git-url}}
+        
+        

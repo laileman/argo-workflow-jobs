@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: terminal
+spec:
+  templates:
+
+  # 3. Shell script/command template
+  - name: run
+    inputs:
+      parameters:
+        - name: workingdir
+        - name: commands
+          description: "Commands to run"
+          default: "echo hello world"
+        - name: image
+          description: "Image to use for the command"
+          default: "bash"
+          enum:
+          - golang:1.24.4-alpine
+          - bash:5.1.16-alpine3.22
+          - python:3.11.13-alpine3.21
+    volumes:
+      - name: workingdir-data
+        persistentVolumeClaim:
+          claimName: "{{inputs.parameters.workingdir}}"
+    script:
+      image: "{{inputs.parameters.image}}"
+      command: [sh,-c]
+      volumeMounts:
+      - name: workingdir-data
+        mountPath: /workingDir
+      source: |
+        {{inputs.parameters.commands}}
+    
+    output:
+      parameters:
+      - name: result
+        valueFrom:
+          path: /tmp/result.txt
+
