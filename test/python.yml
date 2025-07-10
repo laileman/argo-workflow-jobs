@@ -8,18 +8,32 @@ spec:
   templates:
   - name: main
     steps:
+    # - - name: git-clone
+    #     templateRef: 
+    #       name: git-artifact
+    #       template: clone
+    #     arguments:
+    #       parameters:
+    #       - name: workingdir
+    #         value: "{{workflow.name}}-workingdir-data"
+    #       - name: git-url
+    #         value: "https://github.com/laileman/ec2-cli-demo.git"
+    #       - name: git-revision
+    #         value: main
     - - name: git-clone
-        templateRef: 
-          name: git-artifact
-          template: clone
+        templateRef:
+          name: git
+          template: repo
         arguments:
           parameters:
+          - name: url
+            value: "https://github.com/laileman/ec2-cli-demo.git"
+          - name: revision
+            value: main
           - name: workingdir
             value: "{{workflow.name}}-workingdir-data"
-          - name: git-url
-            value: "https://github.com/laileman/ec2-cli-demo.git"
-          - name: git-revision
-            value: main
+          - name: path
+            value: "ec2-cli-demo"
 
     - - name: python-test
         templateRef:
