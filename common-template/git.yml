@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: git
+spec:
+  templates:
+  - name: repo
+    inputs:
+      parameters:
+      - name: url
+        description: "Git repository URL"
+      - name: revision
+        description: "Git revision (branch, tag, or commit)"
+      - name: path
+        description: "Path to clone the repository"
+      - name: workingdir
+      artifacts:
+      - name: git-repo
+        path: "/workingDir/git/{{inputs.parameters.path}}"
+        git:
+          repo: "{{inputs.parameters.url}}"
+          revision: "{{inputs.parameters.revision}}"
+      # volumeMounts:
+      # - name: pvc
+      #   mountPath: "/workingDir-{{inputs.parameters.path}}"
+
+    volumes:
+      - name: pvc
+        persistentVolumeClaim:
+          claimName: "{{inputs.parameters.workingdir}}"
+    container:
+      image: alpine/git:latest
+      command: [sh,-c]
+      args:
+      - |
+        pwd
+        cd /workingDir/git/"{{inputs.parameters.path}}"
+        ls -a
+      volumeMounts:
+      - name: pvc
+        mountPath: "/workingDir"
+
+    
+
+  
+
+    
